@@ -1,0 +1,53 @@
+name: cis-aws-1.5
+version: "1.5.0"
+description: CIS Amazon Web Services Foundations Benchmark v1.5.0
+controls:
+  - id: "CIS AWS 1.4"
+    title: "Ensure no root account access key exists"
+    severity: critical
+    section: "1. Identity and Access Management"
+
+  - id: "CIS AWS 1.8"
+    title: "Ensure IAM password policy requires minimum length of 14"
+    severity: medium
+    section: "1. Identity and Access Management"
+
+  - id: "CIS AWS 1.10"
+    title: "Ensure multi-factor authentication (MFA) is enabled for all IAM users"
+    severity: high
+    section: "1. Identity and Access Management"
+
+  - id: "CIS AWS 2.1.5"
+    title: "Ensure S3 bucket public access is blocked"
+    severity: high
+    section: "2. Storage"
+
+  - id: "CIS AWS 2.2.1"
+    title: "Ensure EBS volume encryption is enabled"
+    severity: medium
+    section: "2. Storage"
+
+  - id: "CIS AWS 2.3.1"
+    title: "Ensure RDS encryption is enabled"
+    severity: high
+    section: "2. Storage"
+
+  - id: "CIS AWS 3.1"
+    title: "Ensure CloudTrail is enabled in all regions"
+    severity: critical
+    section: "3. Logging"
+
+  - id: "CIS AWS 3.8"
+    title: "Ensure rotation for customer-created CMKs is enabled"
+    severity: medium
+    section: "3. Logging"
+
+  - id: "CIS AWS 3.9"
+    title: "Ensure VPC flow logging is enabled in all VPCs"
+    severity: medium
+    section: "3. Logging"
+
+  - id: "CIS AWS 5.2"
+    title: "Ensure no security groups allow unrestricted ingress to high-risk ports"
+    severity: critical
+    section: "5. Networking"
