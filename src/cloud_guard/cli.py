@@ -5,12 +5,11 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from cloud_guard.core.config import settings
-from cloud_guard.scanners.registry import scanner_registry
-
 # Ensure scanners are registered
 import cloud_guard.scanners.aws_scanner  # noqa: F401
 import cloud_guard.scanners.k8s_scanner  # noqa: F401
+from cloud_guard.core.config import settings
+from cloud_guard.scanners.registry import scanner_registry
 
 app = typer.Typer(name="cloud-guard", help="Cloud Security Posture Management CLI")
 console = Console()
@@ -60,8 +59,10 @@ def scan(
         )
 
     console.print(table)
-    console.print(f"\n[bold]Summary:[/bold] {len(result.findings)} findings "
-                  f"({result.critical_count} critical, {result.high_count} high)")
+    console.print(
+        f"\n[bold]Summary:[/bold] {len(result.findings)} findings "
+        f"({result.critical_count} critical, {result.high_count} high)"
+    )
 
     if result.errors:
         console.print(f"\n[yellow]Errors ({len(result.errors)}):[/yellow]")
@@ -76,6 +77,7 @@ def serve(
 ):
     """Start the Cloud Guard API server."""
     import uvicorn
+
     console.print(f"[bold green]Starting Cloud Guard API on {host}:{port}[/bold green]")
     uvicorn.run("cloud_guard.api.app:app", host=host, port=port, reload=settings.debug)
 

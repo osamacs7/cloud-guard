@@ -2,8 +2,7 @@ from pathlib import Path
 
 import yaml
 
-from cloud_guard.models.entities import Severity
-from cloud_guard.scanners.base import ScanFinding, ScanResult
+from cloud_guard.scanners.base import ScanResult
 
 
 class ComplianceFramework:

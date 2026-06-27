@@ -1,6 +1,4 @@
 import pytest
-from unittest.mock import AsyncMock, patch
-
 from fastapi.testclient import TestClient
 
 from cloud_guard.api.app import app

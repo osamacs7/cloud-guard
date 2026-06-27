@@ -63,16 +63,18 @@ class KubernetesScanner(BaseScanner):
             for container in pod.spec.containers or []:
                 sc = container.security_context
                 if sc and sc.privileged:
-                    findings.append(ScanFinding(
-                        rule_id="CG-K8S-POD-001",
-                        title="Privileged container detected",
-                        description=f"Container {container.name} in pod {pod.metadata.name} runs in privileged mode",
-                        severity=Severity.CRITICAL,
-                        resource_type="k8s_pod",
-                        resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
-                        remediation="Remove privileged: true from the container security context",
-                        compliance_control="CIS K8s 5.2.1",
-                    ))
+                    findings.append(
+                        ScanFinding(
+                            rule_id="CG-K8S-POD-001",
+                            title="Privileged container detected",
+                            description=f"Container {container.name} in pod {pod.metadata.name} runs in privileged mode",
+                            severity=Severity.CRITICAL,
+                            resource_type="k8s_pod",
+                            resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
+                            remediation="Remove privileged: true from the container security context",
+                            compliance_control="CIS K8s 5.2.1",
+                        )
+                    )
 
         return findings
 
@@ -84,16 +86,18 @@ class KubernetesScanner(BaseScanner):
             for container in pod.spec.containers or []:
                 sc = container.security_context
                 if not sc or sc.run_as_non_root is not True:
-                    findings.append(ScanFinding(
-                        rule_id="CG-K8S-POD-002",
-                        title="Container may run as root",
-                        description=f"Container {container.name} in pod {pod.metadata.name} does not enforce non-root",
-                        severity=Severity.HIGH,
-                        resource_type="k8s_pod",
-                        resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
-                        remediation="Set runAsNonRoot: true in the container security context",
-                        compliance_control="CIS K8s 5.2.6",
-                    ))
+                    findings.append(
+                        ScanFinding(
+                            rule_id="CG-K8S-POD-002",
+                            title="Container may run as root",
+                            description=f"Container {container.name} in pod {pod.metadata.name} does not enforce non-root",
+                            severity=Severity.HIGH,
+                            resource_type="k8s_pod",
+                            resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
+                            remediation="Set runAsNonRoot: true in the container security context",
+                            compliance_control="CIS K8s 5.2.6",
+                        )
+                    )
 
         return findings
 
@@ -106,16 +110,18 @@ class KubernetesScanner(BaseScanner):
                 continue
             for container in pod.spec.containers or []:
                 if not container.resources or not container.resources.limits:
-                    findings.append(ScanFinding(
-                        rule_id="CG-K8S-POD-003",
-                        title="Container missing resource limits",
-                        description=f"Container {container.name} in pod {pod.metadata.name} has no resource limits",
-                        severity=Severity.MEDIUM,
-                        resource_type="k8s_pod",
-                        resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
-                        remediation="Define CPU and memory limits for this container",
-                        compliance_control="CIS K8s 5.4.1",
-                    ))
+                    findings.append(
+                        ScanFinding(
+                            rule_id="CG-K8S-POD-003",
+                            title="Container missing resource limits",
+                            description=f"Container {container.name} in pod {pod.metadata.name} has no resource limits",
+                            severity=Severity.MEDIUM,
+                            resource_type="k8s_pod",
+                            resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
+                            remediation="Define CPU and memory limits for this container",
+                            compliance_control="CIS K8s 5.4.1",
+                        )
+                    )
 
         return findings
 
@@ -128,16 +134,18 @@ class KubernetesScanner(BaseScanner):
                 continue
             policies = self.networking_v1.list_namespaced_network_policy(ns.metadata.name)
             if not policies.items:
-                findings.append(ScanFinding(
-                    rule_id="CG-K8S-NET-001",
-                    title="Namespace missing network policies",
-                    description=f"Namespace {ns.metadata.name} has no network policies",
-                    severity=Severity.MEDIUM,
-                    resource_type="k8s_namespace",
-                    resource_id=ns.metadata.name,
-                    remediation="Define network policies to restrict pod-to-pod traffic",
-                    compliance_control="CIS K8s 5.3.2",
-                ))
+                findings.append(
+                    ScanFinding(
+                        rule_id="CG-K8S-NET-001",
+                        title="Namespace missing network policies",
+                        description=f"Namespace {ns.metadata.name} has no network policies",
+                        severity=Severity.MEDIUM,
+                        resource_type="k8s_namespace",
+                        resource_id=ns.metadata.name,
+                        remediation="Define network policies to restrict pod-to-pod traffic",
+                        compliance_control="CIS K8s 5.3.2",
+                    )
+                )
 
         return findings
 
@@ -149,16 +157,18 @@ class KubernetesScanner(BaseScanner):
             if pod.metadata.namespace in ("kube-system", "kube-public"):
                 continue
             if pod.spec.service_account_name == "default":
-                findings.append(ScanFinding(
-                    rule_id="CG-K8S-SA-001",
-                    title="Pod using default service account",
-                    description=f"Pod {pod.metadata.name} uses the default service account",
-                    severity=Severity.MEDIUM,
-                    resource_type="k8s_pod",
-                    resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
-                    remediation="Create and assign a dedicated service account",
-                    compliance_control="CIS K8s 5.1.5",
-                ))
+                findings.append(
+                    ScanFinding(
+                        rule_id="CG-K8S-SA-001",
+                        title="Pod using default service account",
+                        description=f"Pod {pod.metadata.name} uses the default service account",
+                        severity=Severity.MEDIUM,
+                        resource_type="k8s_pod",
+                        resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
+                        remediation="Create and assign a dedicated service account",
+                        compliance_control="CIS K8s 5.1.5",
+                    )
+                )
 
         return findings
 
@@ -176,15 +186,17 @@ class KubernetesScanner(BaseScanner):
                 issues.append("hostIPC")
 
             if issues:
-                findings.append(ScanFinding(
-                    rule_id="CG-K8S-POD-004",
-                    title="Pod using host namespaces",
-                    description=f"Pod {pod.metadata.name} uses host namespaces: {', '.join(issues)}",
-                    severity=Severity.HIGH,
-                    resource_type="k8s_pod",
-                    resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
-                    remediation="Disable host namespace sharing unless absolutely required",
-                    compliance_control="CIS K8s 5.2.2",
-                ))
+                findings.append(
+                    ScanFinding(
+                        rule_id="CG-K8S-POD-004",
+                        title="Pod using host namespaces",
+                        description=f"Pod {pod.metadata.name} uses host namespaces: {', '.join(issues)}",
+                        severity=Severity.HIGH,
+                        resource_type="k8s_pod",
+                        resource_id=f"{pod.metadata.namespace}/{pod.metadata.name}",
+                        remediation="Disable host namespace sharing unless absolutely required",
+                        compliance_control="CIS K8s 5.2.2",
+                    )
+                )
 
         return findings

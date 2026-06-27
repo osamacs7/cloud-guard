@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 from cloud_guard.compliance.engine import ComplianceEngine, ComplianceFramework
 from cloud_guard.models.entities import Severity

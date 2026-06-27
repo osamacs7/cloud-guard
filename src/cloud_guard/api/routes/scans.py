@@ -84,7 +84,9 @@ async def scan_stats(
 ):
     total = await db.execute(select(func.count(Scan.id)))
     findings_total = await db.execute(select(func.count(Finding.id)))
-    critical = await db.execute(select(func.count(Finding.id)).where(Finding.severity == "critical"))
+    critical = await db.execute(
+        select(func.count(Finding.id)).where(Finding.severity == "critical")
+    )
 
     return {
         "total_scans": total.scalar() or 0,

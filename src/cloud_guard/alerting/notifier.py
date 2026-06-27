@@ -1,6 +1,4 @@
-import json
 from abc import ABC, abstractmethod
-from email.message import EmailMessage
 
 import httpx
 
@@ -11,8 +9,7 @@ from cloud_guard.scanners.base import ScanResult
 
 class BaseNotifier(ABC):
     @abstractmethod
-    async def send(self, result: ScanResult, scan_id: str) -> None:
-        ...
+    async def send(self, result: ScanResult, scan_id: str) -> None: ...
 
 
 class SlackNotifier(BaseNotifier):
@@ -20,21 +17,36 @@ class SlackNotifier(BaseNotifier):
         if not settings.slack_webhook_url:
             return
 
-        color = "#dc3545" if result.critical_count > 0 else "#ffc107" if result.high_count > 0 else "#28a745"
+        if result.critical_count > 0:
+            color = "#dc3545"
+        elif result.high_count > 0:
+            color = "#ffc107"
+        else:
+            color = "#28a745"
 
         payload = {
-            "attachments": [{
-                "color": color,
-                "title": f"Cloud Guard Scan Complete — {result.provider.upper()}",
-                "fields": [
-                    {"title": "Scan ID", "value": scan_id, "short": True},
-                    {"title": "Provider", "value": result.provider, "short": True},
-                    {"title": "Total Findings", "value": str(len(result.findings)), "short": True},
-                    {"title": "Critical", "value": str(result.critical_count), "short": True},
-                    {"title": "High", "value": str(result.high_count), "short": True},
-                    {"title": "Resources Scanned", "value": str(result.resources_scanned), "short": True},
-                ],
-            }],
+            "attachments": [
+                {
+                    "color": color,
+                    "title": f"Cloud Guard Scan Complete — {result.provider.upper()}",
+                    "fields": [
+                        {"title": "Scan ID", "value": scan_id, "short": True},
+                        {"title": "Provider", "value": result.provider, "short": True},
+                        {
+                            "title": "Total Findings",
+                            "value": str(len(result.findings)),
+                            "short": True,
+                        },
+                        {"title": "Critical", "value": str(result.critical_count), "short": True},
+                        {"title": "High", "value": str(result.high_count), "short": True},
+                        {
+                            "title": "Resources Scanned",
+                            "value": str(result.resources_scanned),
+                            "short": True,
+                        },
+                    ],
+                }
+            ],
         }
 
         async with httpx.AsyncClient() as client:
@@ -108,4 +120,6 @@ async def notify_all(result: ScanResult, scan_id: str) -> None:
         try:
             await notifier.send(result, scan_id)
         except Exception as e:
-            await logger.aerror("notification_failed", notifier=type(notifier).__name__, error=str(e))
+            await logger.aerror(
+                "notification_failed", notifier=type(notifier).__name__, error=str(e)
+            )

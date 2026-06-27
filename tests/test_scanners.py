@@ -1,5 +1,3 @@
-import pytest
-
 from cloud_guard.models.entities import Severity
 from cloud_guard.scanners.base import ScanFinding, ScanResult
 

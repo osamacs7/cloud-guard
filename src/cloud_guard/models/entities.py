@@ -11,13 +11,13 @@ class Base(DeclarativeBase):
     pass
 
 
-class Role(str, enum.Enum):
+class Role(enum.StrEnum):
     ADMIN = "admin"
     AUDITOR = "auditor"
     VIEWER = "viewer"
 
 
-class Severity(str, enum.Enum):
+class Severity(enum.StrEnum):
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -25,7 +25,7 @@ class Severity(str, enum.Enum):
     INFO = "info"
 
 
-class ScanStatus(str, enum.Enum):
+class ScanStatus(enum.StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -41,7 +41,9 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column(Enum(Role), default=Role.VIEWER)
     is_active: Mapped[bool] = mapped_column(default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
+    )
 
     scans: Mapped[list["Scan"]] = relationship(back_populates="created_by_user")
 
@@ -54,7 +56,9 @@ class Scan(Base):
     provider: Mapped[str] = mapped_column(String(50))
     compliance_framework: Mapped[str | None] = mapped_column(String(100))
     status: Mapped[ScanStatus] = mapped_column(Enum(ScanStatus), default=ScanStatus.PENDING)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
+    )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
     total_findings: Mapped[int] = mapped_column(default=0)
@@ -62,7 +66,9 @@ class Scan(Base):
     high_count: Mapped[int] = mapped_column(default=0)
 
     created_by_user: Mapped[User] = relationship(back_populates="scans")
-    findings: Mapped[list["Finding"]] = relationship(back_populates="scan", cascade="all, delete-orphan")
+    findings: Mapped[list["Finding"]] = relationship(
+        back_populates="scan", cascade="all, delete-orphan"
+    )
 
 
 class Finding(Base):
@@ -81,7 +87,9 @@ class Finding(Base):
     remediation: Mapped[str | None] = mapped_column(Text)
     compliance_control: Mapped[str | None] = mapped_column(String(100))
     is_resolved: Mapped[bool] = mapped_column(default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
+    )
 
     scan: Mapped[Scan] = relationship(back_populates="findings")
 
@@ -96,4 +104,6 @@ class AuditLog(Base):
     resource_id: Mapped[str | None] = mapped_column(String(200))
     details: Mapped[str | None] = mapped_column(Text)
     ip_address: Mapped[str | None] = mapped_column(String(45))
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
+    )

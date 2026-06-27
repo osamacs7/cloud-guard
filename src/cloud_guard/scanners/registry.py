@@ -7,4 +7,5 @@ def register_scanner(provider: str):
     def decorator(cls: type[BaseScanner]):
         scanner_registry[provider] = cls
         return cls
+
     return decorator

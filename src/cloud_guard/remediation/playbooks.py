@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from cloud_guard.core.logging import logger
-
 
 @dataclass
 class RemediationStep:
@@ -29,9 +27,9 @@ PLAYBOOKS: dict[str, Playbook] = {
             RemediationStep(
                 description="Enable all S3 Block Public Access settings",
                 command="aws s3api put-public-access-block --bucket {resource_id} "
-                        "--public-access-block-configuration "
-                        "BlockPublicAcls=true,IgnorePublicAcls=true,"
-                        "BlockPublicPolicy=true,RestrictPublicBuckets=true",
+                "--public-access-block-configuration "
+                "BlockPublicAcls=true,IgnorePublicAcls=true,"
+                "BlockPublicPolicy=true,RestrictPublicBuckets=true",
             ),
             RemediationStep(
                 description="Verify the setting was applied",
