@@ -1,7 +1,7 @@
 # ☁️ Cloud Guard — Cloud Security Posture Management Platform
 
-[![CI/CD Pipeline](https://github.com/osamacs7/cloud-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/osamacs7/cloud-guard/actions)
-[![Security Scan](https://github.com/osamacs7/cloud-guard/actions/workflows/security.yml/badge.svg)](https://github.com/osamacs7/cloud-guard/actions)
+[![CI/CD Pipeline](https://github.com/osamacs7/cloud-guard/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/osamacs7/cloud-guard/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/osamacs7/cloud-guard/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/osamacs7/cloud-guard/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
