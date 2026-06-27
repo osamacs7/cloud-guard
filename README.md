@@ -1,7 +1,7 @@
 # ☁️ Cloud Guard — Cloud Security Posture Management Platform
 
-[![CI/CD Pipeline](https://github.com/username/cloud-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/username/cloud-guard/actions)
-[![Security Scan](https://github.com/username/cloud-guard/actions/workflows/security.yml/badge.svg)](https://github.com/username/cloud-guard/actions)
+[![CI/CD Pipeline](https://github.com/osamacs7/cloud-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/osamacs7/cloud-guard/actions)
+[![Security Scan](https://github.com/osamacs7/cloud-guard/actions/workflows/security.yml/badge.svg)](https://github.com/osamacs7/cloud-guard/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
@@ -48,7 +48,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/cloud-guard.git
+git clone https://github.com/osamacs7/cloud-guard.git
 cd cloud-guard
 
 # Start with Docker Compose
