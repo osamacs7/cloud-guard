@@ -9,18 +9,248 @@
 
 ## Architecture
 
+### System Overview
+
+```mermaid
+graph TB
+    subgraph Users["Users & Integrations"]
+        CLI["CLI Tool"]
+        API_Client["API Clients"]
+        CI_CD["CI/CD Pipelines"]
+        Schedule["Scheduled Jobs"]
+    end
+
+    subgraph Platform["Cloud Guard Platform"]
+        direction TB
+        API["REST API<br/><i>FastAPI + JWT Auth</i>"]
+        
+        subgraph Engines["Core Engines"]
+            Scanner["Scanner Engine"]
+            Compliance["Compliance Engine"]
+            Remediation["Remediation Engine"]
+        end
+
+        subgraph Notifications["Alerting System"]
+            Slack["Slack"]
+            PD["PagerDuty"]
+            Webhook["Webhooks"]
+            Email["Email"]
+        end
+    end
+
+    subgraph Providers["Cloud Providers"]
+        AWS["AWS"]
+        Azure["Azure"]
+        GCP["GCP"]
+        K8s["Kubernetes"]
+    end
+
+    subgraph Storage["Data Layer"]
+        PG[("PostgreSQL")]
+        Redis[("Redis<br/><i>Cache & Queue</i>")]
+    end
+
+    CLI --> API
+    API_Client --> API
+    CI_CD --> API
+    Schedule --> API
+
+    API --> Scanner
+    API --> Compliance
+    API --> Remediation
+
+    Scanner --> AWS
+    Scanner --> Azure
+    Scanner --> GCP
+    Scanner --> K8s
+
+    Scanner --> Compliance
+    Compliance --> Notifications
+
+    API --> PG
+    API --> Redis
+
+    style Platform fill:#1a1a2e,stroke:#16213e,color:#fff
+    style Engines fill:#0f3460,stroke:#16213e,color:#fff
+    style Notifications fill:#533483,stroke:#16213e,color:#fff
+    style Providers fill:#e94560,stroke:#16213e,color:#fff
+    style Storage fill:#0f3460,stroke:#16213e,color:#fff
+    style Users fill:#16213e,stroke:#16213e,color:#fff
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Cloud Guard Platform                  │
-├─────────────┬──────────────┬──────────────┬─────────────┤
-│  REST API   │  Scanner     │  Compliance  │  Alerting   │
-│  (FastAPI)  │  Engine      │  Engine      │  System     │
-├─────────────┴──────────────┴──────────────┴─────────────┤
-│                    Core Framework                        │
-├─────────────┬──────────────┬──────────────┬─────────────┤
-│  AWS        │  Azure       │  GCP         │  Kubernetes │
-│  Provider   │  Provider    │  Provider    │  Provider   │
-└─────────────┴──────────────┴──────────────┴─────────────┘
+
+### Scanning Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User / CI Pipeline
+    participant API as Cloud Guard API
+    participant S as Scanner Engine
+    participant C as Compliance Engine
+    participant P as Cloud Provider
+    participant N as Alerting System
+    participant DB as PostgreSQL
+
+    U->>API: POST /api/v1/scans
+    API->>DB: Create scan record (PENDING)
+    API-->>U: 201 Scan Created
+
+    API->>S: Trigger scan
+    S->>DB: Update status (RUNNING)
+
+    loop For each security check
+        S->>P: Query resource configuration
+        P-->>S: Resource metadata
+        S->>S: Evaluate against rules
+    end
+
+    S->>C: Evaluate compliance
+    C->>C: Map findings to controls
+    C-->>S: Compliance report
+
+    S->>DB: Store findings
+    S->>DB: Update status (COMPLETED)
+
+    alt Critical findings found
+        S->>N: Send alerts
+        N->>N: Slack + PagerDuty + Webhook
+    end
+
+    U->>API: GET /api/v1/scans/{id}/findings
+    API->>DB: Query findings
+    DB-->>API: Finding records
+    API-->>U: Findings + compliance score
+```
+
+### CI/CD Security Pipeline
+
+```mermaid
+graph LR
+    subgraph CI["CI/CD Pipeline"]
+        direction LR
+        Lint["Lint<br/><i>Ruff</i>"] --> Test["Test<br/><i>Pytest</i>"]
+        Test --> SAST["SAST<br/><i>Bandit + Semgrep</i>"]
+        SAST --> Build["Docker<br/>Build"]
+        Build --> ContainerScan["Container Scan<br/><i>Trivy</i>"]
+        ContainerScan --> Deploy["Deploy"]
+    end
+
+    subgraph Weekly["Weekly Security Scan"]
+        direction LR
+        DepAudit["Dependency<br/>Audit<br/><i>Safety + pip-audit</i>"]
+        CodeQL["CodeQL<br/>Analysis"]
+        Secrets["Secret Scan<br/><i>TruffleHog</i>"]
+    end
+
+    style Lint fill:#28a745,stroke:#1e7e34,color:#fff
+    style Test fill:#28a745,stroke:#1e7e34,color:#fff
+    style SAST fill:#fd7e14,stroke:#e36209,color:#fff
+    style Build fill:#007bff,stroke:#0056b3,color:#fff
+    style ContainerScan fill:#fd7e14,stroke:#e36209,color:#fff
+    style Deploy fill:#6f42c1,stroke:#5a32a3,color:#fff
+    style DepAudit fill:#fd7e14,stroke:#e36209,color:#fff
+    style CodeQL fill:#fd7e14,stroke:#e36209,color:#fff
+    style Secrets fill:#dc3545,stroke:#bd2130,color:#fff
+```
+
+### Infrastructure Deployment
+
+```mermaid
+graph TB
+    subgraph AWS_Cloud["AWS Cloud"]
+        subgraph VPC["VPC (10.0.0.0/16)"]
+            subgraph Public["Public Subnets"]
+                ALB["Application<br/>Load Balancer"]
+                NAT["NAT Gateway"]
+            end
+
+            subgraph Private["Private Subnets"]
+                subgraph ECS["ECS Cluster"]
+                    Task1["Cloud Guard<br/>Container #1"]
+                    Task2["Cloud Guard<br/>Container #2"]
+                end
+                RDS[("RDS PostgreSQL<br/><i>Encrypted, Multi-AZ</i>")]
+                ElastiCache[("ElastiCache Redis")]
+            end
+        end
+
+        CloudWatch["CloudWatch<br/>Monitoring"]
+        FlowLogs["VPC Flow Logs"]
+    end
+
+    Internet["Internet"] --> ALB
+    ALB --> Task1
+    ALB --> Task2
+    Task1 --> RDS
+    Task2 --> RDS
+    Task1 --> ElastiCache
+    Task2 --> ElastiCache
+    VPC --> FlowLogs
+    ECS --> CloudWatch
+
+    style AWS_Cloud fill:#232f3e,stroke:#ff9900,color:#fff
+    style VPC fill:#1a1a2e,stroke:#ff9900,color:#fff
+    style Public fill:#0f3460,stroke:#ff9900,color:#fff
+    style Private fill:#16213e,stroke:#ff9900,color:#fff
+    style ECS fill:#533483,stroke:#ff9900,color:#fff
+```
+
+### Data Model
+
+```mermaid
+erDiagram
+    USERS {
+        uuid id PK
+        string username UK
+        string email UK
+        string hashed_password
+        enum role "admin | auditor | viewer"
+        bool is_active
+        timestamp created_at
+    }
+
+    SCANS {
+        uuid id PK
+        string provider
+        string compliance_framework
+        enum status "pending | running | completed | failed"
+        timestamp created_at
+        timestamp completed_at
+        uuid created_by FK
+        int total_findings
+        int critical_count
+        int high_count
+    }
+
+    FINDINGS {
+        uuid id PK
+        uuid scan_id FK
+        string rule_id
+        string title
+        text description
+        enum severity "critical | high | medium | low | info"
+        string resource_type
+        string resource_id
+        string region
+        text remediation
+        string compliance_control
+        bool is_resolved
+        timestamp created_at
+    }
+
+    AUDIT_LOGS {
+        uuid id PK
+        uuid user_id FK
+        string action
+        string resource_type
+        string resource_id
+        text details
+        string ip_address
+        timestamp timestamp
+    }
+
+    USERS ||--o{ SCANS : creates
+    SCANS ||--o{ FINDINGS : contains
+    USERS ||--o{ AUDIT_LOGS : generates
 ```
 
 ## Features
