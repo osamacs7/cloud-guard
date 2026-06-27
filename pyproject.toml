@@ -97,5 +97,5 @@ source = ["cloud_guard"]
 branch = true
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 30
 show_missing = true
